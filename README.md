@@ -38,12 +38,33 @@ JWT_EXPIRES_IN="tiempo de expiración"
 
 ```
 
+
+
 - genere las migraciones locales :
 
 ```bash
 npx prisma init
+```
+
+- cree un modelo prisma :
+```bash
+model User {
+ id    Int     @id @default(autoincrement())
+ email String  @unique
+ name  String
+ password String
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+}
+
+```
+
+- cree su schema local
+```bash
 npx prisma generate
 ```
+
+
 
 - finalmente ponga a correr el proyecto de forma local
 

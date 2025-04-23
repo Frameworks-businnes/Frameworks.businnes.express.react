@@ -1,3 +1,4 @@
+
 import { PrismaClient } from "@prisma/client";
 import { UserInterface, UserResponseInterface } from "../interfaces/User.interface";
 import { UserRepositoryInterface } from "../interfaces/UserRepository.interface";
