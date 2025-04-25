@@ -14,6 +14,10 @@ import { UserRoutes } from "./routes/User.routes";
 import { AuthRoutes } from "./routes/Auth.routes";
 import { AuthMiddleware } from "./middlewares/Auth.middleware";
 
+import { VehicleRepository } from "./repositories/Vehicle.repository";
+import { VehicleControllerService } from "./controllers/Vehicle.controller.service";
+import { VehicleRoutes } from "./routes/Vehicle.routes";
+
 class Server {
     private server: express.Application;
     private port: typeof Enviroments.PORT;
@@ -46,8 +50,14 @@ class Server {
             const userRoutes = new UserRoutes(userController, express.Router(), authMiddleware);
             const authRoutes = new AuthRoutes(authController, express.Router());
 
+            const vehicleRepository = new VehicleRepository();
+            const vehicleController = new VehicleControllerService(vehicleRepository);
+            const vehicleRoutes = new VehicleRoutes(vehicleController, express.Router());
+
             this.server.use("/api", userRoutes.initRoutes());
             this.server.use("/api/auth", authRoutes.initRoutes());
+
+            this.server.use("/api", vehicleRoutes.initRoutes());
             
             this.server.listen(this.port, () => {
                 console.log(`Server running at http://localhost:${this.port}`);
