@@ -1,7 +1,5 @@
 import { UserInterface } from "./User.interface";
 
-
-
 export interface UserRepositoryInterface {
 
     create(user:Partial<UserInterface>):Promise<UserInterface>;
