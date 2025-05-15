@@ -1,5 +1,5 @@
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma";
 import { UserInterface, UserResponseInterface } from "../interfaces/User.interface";
 import { UserRepositoryInterface } from "../interfaces/UserRepository.interface";
 import { AuthService } from "../services/Auth.service";
@@ -12,15 +12,15 @@ export class UserRepository implements UserRepositoryInterface {
             if (!user.password) {
                 throw new Error("Password is required");
             }
-            
-
+           
             const hashedPassword = await AuthService.hashPassword(user.password);
             
             const newUser = await prisma.user.create({
                 data: {
-                    name: user.name!,
                     email: user.email!,
-                    password: hashedPassword
+                    name: user.name!,
+                    password: hashedPassword,
+                    updatedAt : Date()
                 }
             });
 

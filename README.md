@@ -29,12 +29,16 @@ npm i
 
 ```bash
 
-DATABASE_URL="uri conexión"
-
-PORT=el puerto
-
-JWT_SECRET="llave secreta"
-JWT_EXPIRES_IN="tiempo de expiración"
+PORT=3000
+ 
+JWT_SECRET="cPn00oM2S5JOYYkrZ7j3vcnZK3BF5gtIeaPpdbR9DuI"
+ 
+JWT_EXPIRES_IN="1d"
+ 
+DATABASE_URL="mysql://u3oy5djlgv25nkkc:aBV5j0fRI0Lf4Poj1gvi@ba1k0k2bqhihynfoepwb-mysql.services.clever-cloud.com:3306/ba1k0k2bqhihynfoepwb"
+ 
+SHADOW_DATABASE_URL=""
+ 
 
 ```
 
@@ -46,16 +50,10 @@ JWT_EXPIRES_IN="tiempo de expiración"
 npx prisma init
 ```
 
-- cree un modelo prisma :
+- genera de forma local la tablas :
 ```bash
-model User {
- id    Int     @id @default(autoincrement())
- email String  @unique
- name  String
- password String
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt
-}
+
+npx prisma db pull
 
 ```
 

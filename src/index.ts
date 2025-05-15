@@ -52,7 +52,8 @@ class Server {
 
             const vehicleRepository = new VehicleRepository();
             const vehicleController = new VehicleControllerService(vehicleRepository);
-            const vehicleRoutes = new VehicleRoutes(vehicleController, express.Router());
+            
+            const vehicleRoutes = new VehicleRoutes(vehicleController, express.Router(), authMiddleware);
 
             this.server.use("/api", userRoutes.initRoutes());
             this.server.use("/api/auth", authRoutes.initRoutes());
