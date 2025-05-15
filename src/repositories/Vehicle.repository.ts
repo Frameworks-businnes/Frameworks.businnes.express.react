@@ -5,7 +5,7 @@ import { VehicleInterface, VehicleResponseInterface } from '../interfaces/Vehicl
 import { VehicleRepositoryInterface } from '../interfaces/VehicleRepository.interface';
 
 const prisma = new PrismaClient();
-
+const hola = "Hola mundo";
 export class VehicleRepository implements VehicleRepositoryInterface {
     async create(vehicle: Partial<VehicleInterface>): Promise<VehicleInterface> {
         try {
