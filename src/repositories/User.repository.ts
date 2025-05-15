@@ -19,8 +19,7 @@ export class UserRepository implements UserRepositoryInterface {
                 data: {
                     email: user.email!,
                     name: user.name!,
-                    password: hashedPassword,
-                    updatedAt : Date()
+                    password: hashedPassword
                 }
             });
 

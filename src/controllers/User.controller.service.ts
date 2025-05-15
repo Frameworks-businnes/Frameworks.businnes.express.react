@@ -27,6 +27,9 @@ export class UserControllerService {
                 data: this.repository.toResponseObject(user)
             });
         } catch (error) {
+
+            console.log(error)
+            
             if (error instanceof Error && error.message === "Email already exists") {
                 res.status(409).json({
                     message: error.message
