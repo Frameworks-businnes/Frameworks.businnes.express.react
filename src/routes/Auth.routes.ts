@@ -15,6 +15,7 @@ export class AuthRoutes {
 
     initRoutes() {
         try {
+            
             this.router.post("/login", (req: Request, res: Response) => this.controller.login(req, res));
             this.router.post("/logout", (req: Request, res: Response) => this.controller.logout(req, res));
 
