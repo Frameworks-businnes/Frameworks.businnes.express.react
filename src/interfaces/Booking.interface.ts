@@ -1,19 +1,17 @@
 export interface BookingInterface {
     id?: number;
     userid: number;
-    vehiculoid: number;
-    date_start: Date;
-    date_end: Date;
-    status: string;
+    vehicleid: number;
+    startDate: Date;
+    endDate: Date;
     price: number;
 }
 
 export interface BookingResponseInterface {
     id?: number;
     userid: number;
-    vehiculoid: number;
-    date_start: Date;
-    date_end: Date;
-    status: string;
+    vehicleid: number;
+    startDate: Date;
+    endDate: Date;
     price: number;
 }
