@@ -8,11 +8,10 @@ export class BookingControllerService {
     constructor(repository: BookingRepository) {
         this.repository = repository;   
     }
-
     async create(req: Request, res: Response): Promise<void> {
-        const { userid, vehiculoid, date_start, date_end, status, price } = req.body;
+        const { userid, vehicleid, startDate, endDate, price } = req.body;
 
-        if (!userid || !vehiculoid || !date_start || !date_end || !status || !price) {
+        if (!userid || !vehicleid || !startDate || !endDate || !price) {
             res.status(400).json({
                 message: "Cliente, vehiculo, date_start, date_end, status and price are required"
             });
@@ -20,7 +19,7 @@ export class BookingControllerService {
         }
 
         try {
-            const booking = await this.repository.create({ userid, vehiculoid, date_start, date_end, status, price });
+            const booking = await this.repository.create({ userid, vehicleid, startDate, endDate, price });
 
             res.status(201).json({
                 message: "Booking created successfully",
@@ -79,9 +78,9 @@ export class BookingControllerService {
     }
     async update(req: Request, res: Response): Promise<void> {          
         const { id } = req.params;
-        const { userid, vehiculoid, date_start, date_end, status, price } = req.body;
+        const { userid, vehicleid, startDate, endDate, price } = req.body;
 
-        if (!userid || !vehiculoid || !date_start || !date_end || !status || !price) {
+        if (!userid || !vehicleid || !startDate || !endDate || !price) {
             res.status(400).json({
                 message: "Cliente, vehiculo, date_start, date_end, status and price are required"
             });
@@ -89,7 +88,7 @@ export class BookingControllerService {
         }
 
         try {
-            const booking = await this.repository.update(Number(id), { userid, vehiculoid, date_start, date_end, status, price });
+            const booking = await this.repository.update(Number(id), { userid, vehicleid, startDate, endDate, price });
 
             res.status(200).json({
                 message: "Booking updated successfully",
@@ -134,10 +133,10 @@ export class BookingControllerService {
         }
     }
     async getByUserId(req: Request, res: Response): Promise<void> {
-        const { userId } = req.params;
+        const { userid } = req.params;
 
         try {
-            const bookings = await this.repository.getByUserId(Number(userId));
+            const bookings = await this.repository.getByUserId(Number(userid));
 
             res.status(200).json({
                 data: bookings.map(booking => this.repository.toResponseObject(booking))
@@ -150,10 +149,10 @@ export class BookingControllerService {
         }
     }
     async getByVehicleId(req: Request, res: Response): Promise<void> {
-        const { vehicleId } = req.params;
+        const { vehicleid } = req.params;
 
         try {
-            const bookings = await this.repository.getByVehicleId(Number(vehicleId));
+            const bookings = await this.repository.getByVehicleId(Number(vehicleid));
 
             res.status(200).json({
                 data: bookings.map(booking => this.repository.toResponseObject(booking))
@@ -188,22 +187,6 @@ export class BookingControllerService {
             });
         }
     }
-    async getByStatus(req: Request, res: Response): Promise<void> {
-        const { status } = req.params;
-
-        try {
-            const bookings = await this.repository.getByStatus(status);
-
-            res.status(200).json({
-                data: bookings.map((booking: BookingInterface) => this.repository.toResponseObject(booking))
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: "Server error",
-                error: error
-            });
-        }
-    }
     async getByPriceRange(req: Request, res: Response): Promise<void> {
         const { minPrice, maxPrice } = req.query;
 
@@ -216,107 +199,6 @@ export class BookingControllerService {
 
         try {
             const bookings = await this.repository.getByPriceRange(Number(minPrice), Number(maxPrice));
-
-            res.status(200).json({
-                data: bookings.map((booking: BookingInterface) => this.repository.toResponseObject(booking))
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: "Server error",
-                error: error
-            });
-        }
-    }
-    async getByDateAndStatus(req: Request, res: Response): Promise<void> {
-        const { startDate, endDate, status } = req.query;
-
-        if (!startDate || !endDate || !status) {
-            res.status(400).json({
-                message: "startDate, endDate and status are required"
-            });
-            return;
-        }
-
-        try {
-            const bookings = await this.repository.getByDateAndStatus(new Date(startDate as string), new Date(endDate as string), status as string);
-
-            res.status(200).json({
-                data: bookings.map((booking: BookingInterface) => this.repository.toResponseObject(booking))
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: "Server error",
-                error: error
-            });
-        }
-    }
-    async getByPriceAndStatus(req: Request, res: Response): Promise<void> {
-        const { minPrice, maxPrice, status } = req.query;
-
-        if (!minPrice || !maxPrice || !status) {
-            res.status(400).json({
-                message: "minPrice, maxPrice and status are required"
-            });
-            return;
-        }
-
-        try {
-            const bookings = await this.repository.getByPriceAndStatus(Number(minPrice), Number(maxPrice), status as string);
-
-            res.status(200).json({
-                data: bookings.map((booking: BookingInterface) => this.repository.toResponseObject(booking))
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: "Server error",
-                error: error
-            });
-        }
-    }
-    async getByDatePriceAndStatus(req: Request, res: Response): Promise<void> {
-        const { startDate, endDate, minPrice, maxPrice, status } = req.query;
-
-        if (!startDate || !endDate || !minPrice || !maxPrice || !status) {
-            res.status(400).json({
-                message: "startDate, endDate, minPrice, maxPrice and status are required"
-            });
-            return;
-        }
-
-        try {
-            const bookings = await this.repository.getByDatePriceAndStatus(new Date(startDate as string), new Date(endDate as string), Number(minPrice), Number(maxPrice), status as string);
-
-            res.status(200).json({
-                data: bookings.map((booking: BookingInterface) => this.repository.toResponseObject(booking))
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: "Server error",
-                error: error
-            });
-        }
-    }
-    async getByUserIdAndStatus(req: Request, res: Response): Promise<void> {    
-        const { userId, status } = req.params;
-
-        try {
-            const bookings = await this.repository.getByUserIdAndStatus(Number(userId), status);
-
-            res.status(200).json({
-                data: bookings.map((booking: BookingInterface) => this.repository.toResponseObject(booking))
-            });
-        } catch (error) {
-            res.status(500).json({
-                message: "Server error",
-                error: error
-            });
-        }
-    }
-    async getByVehicleIdAndStatus(req: Request, res: Response): Promise<void> {
-        const { vehicleId, status } = req.params;
-
-        try {
-            const bookings = await this.repository.getByVehicleIdAndStatus(Number(vehicleId), status);
 
             res.status(200).json({
                 data: bookings.map((booking: BookingInterface) => this.repository.toResponseObject(booking))
