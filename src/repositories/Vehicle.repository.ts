@@ -1,5 +1,3 @@
-
-
 import { PrismaClient } from '../generated/prisma';
 import { VehicleInterface, VehicleResponseInterface } from '../interfaces/Vehicle.interface';
 import { VehicleRepositoryInterface } from '../interfaces/VehicleRepository.interface';
