@@ -13,7 +13,7 @@ export class CustomerRoutes {
         this.router = router
     }
 
-    initRouter() {
+    initRoutes() {
         try {
             this.router.get("/customers", (req: Request, res: Response) => 
                 this.controller.getAll(req, res))
