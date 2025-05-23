@@ -48,10 +48,11 @@ export class CustomerControllerService {
                 customer: this.repository.toResponseObject(customer)
             })
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             res.status(500).json({ 
                 message: "Error creating customer",
-                error: error
-            })
+                error: errorMessage 
+            });
         }
     }
 

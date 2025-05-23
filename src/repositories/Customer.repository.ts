@@ -62,6 +62,7 @@ export class CustomerRepository implements CustomerRepositoryInterface {
 
     async update(id: number, customer: Partial<CustomerInterface>): Promise<CustomerInterface> {
         try {
+            customer.updatedAt = new Date();
             const updatedCustomer = await prisma.customer.update({
                 where: { id },
                 data: customer
@@ -93,32 +94,22 @@ export class CustomerRepository implements CustomerRepositoryInterface {
         }
     }
 
-    async getByEmail(email: string): Promise<CustomerInterface> {
+    async getByEmail(email: string): Promise<CustomerInterface | null> {
         try {
             const customer = await prisma.customer.findUnique({
                 where: { email }
             })
-
-            if (!customer){
-                throw new Error("Customer not found")
-            }
-
             return customer
         } catch (error) {
             throw error
         }
     }
 
-    async getByDocument(document: string): Promise<CustomerInterface> {
+    async getByDocument(document: string): Promise<CustomerInterface | null> {
         try {
             const customer = await prisma.customer.findUnique({
                 where: { document }
             })
-
-            if (!customer){
-                throw new Error("Customer not found")
-            }
-
             return customer
         } catch (error) {
             throw error
