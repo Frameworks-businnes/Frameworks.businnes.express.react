@@ -14,6 +14,7 @@ export class CustomerRepository implements CustomerRepositoryInterface {
                     lastname: customer.lastname!,
                     document: customer.document!,
                     type_document: customer.type_document!,
+                    file_document: customer.file_document!,
                     license: customer.license!,
                     phone: customer.phone!,
                     email: customer.email!,
@@ -23,7 +24,6 @@ export class CustomerRepository implements CustomerRepositoryInterface {
                     updatedAt: new Date()
                 }
             })
-
             return newCustomer;
         } catch (error) {
             throw error;
@@ -134,7 +134,7 @@ export class CustomerRepository implements CustomerRepositoryInterface {
     }
 
     toResponseObject(customer: CustomerInterface): CustomerResponseInterface {
-        const { id, name, lastname, document, type_document, license, phone, email, is_foreign, is_blocked, createdAt, updatedAt } = customer;
-        return { id: id!, name, lastname, document, type_document, license, phone, email, is_foreign, is_blocked, createdAt: createdAt!, updatedAt: updatedAt! };
+        const { id, name, lastname, document, type_document, file_document, license, phone, email, is_foreign, is_blocked, createdAt, updatedAt } = customer;
+        return { id: id!, name, lastname, document, type_document, file_document, license, phone, email, is_foreign, is_blocked, createdAt: createdAt!, updatedAt: updatedAt! };
     }
 }

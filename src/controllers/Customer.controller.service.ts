@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { CustomerRepository } from "../repositories/Customer.repository" 
 import { CustomerInterface } from "../interfaces/Customer.interface"
+import { upload } from "../services/UploadFile.service"
 
 export class CustomerControllerService {
     private repository: CustomerRepository
@@ -10,52 +11,65 @@ export class CustomerControllerService {
     }
 
     async create(req: Request, res: Response): Promise<void> {
-        const { name, lastname, document, type_document, license, phone, email, is_foreign } = req.body
-
-        if (!name || !lastname || !document || !type_document || !phone || !email || is_foreign === null) {
-            res.status(400).json({ message: "Missing required fields" })
-            return
-        }
-
+        upload.fields([
+            { name: "file_document", maxCount: 1 },
+            { name: "license", maxCount: 1 }
+        ])(req, res, async (err) => {
         try {
-            const existingEmail = await this.repository.getByEmail(email)
+            if (err) {
+                return res.status(400).json({ message: err.message });
+            }
 
+            const { name, lastname, document, type_document, phone, email, is_foreign } = req.body;
+
+            if (!name || !lastname || !document || !type_document || !phone || !email || is_foreign === null) {
+                return res.status(400).json({ message: "Missing required fields" });
+            }
+
+            const files = req.files as {
+                file_document?: Express.Multer.File[];
+                license?: Express.Multer.File[];
+            };
+
+            const documentFile = files.file_document?.[0];
+            const licenseFile = files.license?.[0];
+
+            const existingEmail = await this.repository.getByEmail(email);
             if (existingEmail) {
-                res.status(400).json({ message: "Email already exists" })
-                return
+                return res.status(400).json({ message: "Email already exists" });
             }
 
-            const existingDocument = await this.repository.getByDocument(document)
-
+            const existingDocument = await this.repository.getByDocument(document);
             if (existingDocument) {
-                res.status(400).json({ message: "Document already exists" })
-                return 
+                return res.status(400).json({ message: "Document already exists" });
             }
-
+            
             const customer = await this.repository.create({
                 name,
                 lastname,
                 document,
                 type_document,
-                license,
+                file_document: documentFile ? `/uploads/${documentFile.filename}` : undefined,
+                license: licenseFile ? `/uploads/${licenseFile.filename}` : undefined,
                 phone,
                 email,
                 is_foreign
-            })
+            });
 
-
-            res.status(201).json({
+            return res.status(201).json({
                 message: "Customer created successfully",
                 customer: this.repository.toResponseObject(customer)
-            })
+            });
+
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-            res.status(500).json({ 
+            return res.status(500).json({ 
                 message: "Error creating customer",
                 error: errorMessage 
             });
         }
-    }
+    });
+}
 
     async getById(req: Request, res: Response): Promise<void> {
         const { id } = req.params
