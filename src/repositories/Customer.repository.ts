@@ -134,7 +134,7 @@ export class CustomerRepository implements CustomerRepositoryInterface {
     }
 
     toResponseObject(customer: CustomerInterface): CustomerResponseInterface {
-        const { id, name, lastname, document, type_document, phone, email, is_foreign, createdAt, updatedAt } = customer;
-        return { id: id!, name, lastname, document, type_document, phone, email, is_foreign, createdAt: createdAt!, updatedAt: updatedAt! };
+        const { id, name, lastname, document, type_document, phone, email, is_foreign, is_blocked, createdAt, updatedAt } = customer;
+        return { id: id!, name, lastname, document, type_document, phone, email, is_foreign, is_blocked: is_blocked, createdAt: createdAt!, updatedAt: updatedAt! };
     }
 }

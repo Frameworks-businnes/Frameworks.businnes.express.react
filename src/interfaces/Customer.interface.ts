@@ -21,6 +21,7 @@ export interface CustomerResponseInterface {
     phone: string;
     email: string;
     is_foreign: boolean;
+    is_blocked: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }
