@@ -4,6 +4,7 @@ export interface CustomerInterface {
     lastname: string;
     document: string;
     type_document: string;
+    license: string;
     phone: string;
     email: string;
     is_foreign: boolean;
@@ -18,6 +19,7 @@ export interface CustomerResponseInterface {
     lastname: string;
     document: string;
     type_document: string;
+    license: string;
     phone: string;
     email: string;
     is_foreign: boolean;
