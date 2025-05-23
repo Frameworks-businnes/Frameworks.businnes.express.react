@@ -90,6 +90,38 @@ export class CustomerRepository implements CustomerRepositoryInterface {
         }
     }
 
+    async getByEmail(email: string): Promise<CustomerInterface> {
+        try {
+            const customer = await prisma.customer.findUnique({
+                where: { email }
+            })
+
+            if (!customer){
+                throw new Error("Customer not found")
+            }
+
+            return customer
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getByDocument(document: string): Promise<CustomerInterface> {
+        try {
+            const customer = await prisma.customer.findUnique({
+                where: { document }
+            })
+
+            if (!customer){
+                throw new Error("Customer not found")
+            }
+
+            return customer
+        } catch (error) {
+            throw error
+        }
+    }
+
     toResponseObject(customer: CustomerInterface): CustomerResponseInterface {
         const { id, name, lastname, document, type_document, phone, email, is_foreign, is_blocked, createdAt, updatedAt } = customer;
         return { id: id!, name, lastname, document, type_document, phone, email, is_foreign, is_blocked, createdAt: createdAt!, updatedAt: updatedAt! };
