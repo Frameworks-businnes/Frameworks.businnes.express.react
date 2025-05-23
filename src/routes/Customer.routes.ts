@@ -29,7 +29,7 @@ export class CustomerRoutes {
                 this.controller.getByEmail(req, res))
             this.router.get("/customers/document/:document", (req: Request, res: Response) => 
                 this.controller.getByDocument(req, res))
-            this.router.post("/customers/block", (req: Request, res: Response) => 
+            this.router.put("/customers/block/:id", (req: Request, res: Response) => 
                 this.controller.blockCustomer(req, res))
 
             return this.router

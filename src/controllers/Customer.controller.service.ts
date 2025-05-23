@@ -12,7 +12,7 @@ export class CustomerControllerService {
     async create(req: Request, res: Response): Promise<void> {
         const { name, lastname, document, type_document, phone, email, is_foreign } = req.body
 
-        if (!name || !lastname || !document || !type_document || !phone || !email || !is_foreign) {
+        if (!name || !lastname || !document || !type_document || !phone || !email || is_foreign === null) {
             res.status(400).json({ message: "Missing required fields" })
             return
         }

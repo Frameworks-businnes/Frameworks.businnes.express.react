@@ -32,7 +32,7 @@ export class CustomerRepository implements CustomerRepositoryInterface {
     async get(id: number): Promise<CustomerInterface> {
         try {
             const customer = await prisma.customer.findUnique({ 
-                where: { id, is_blocked: false } 
+                where: { id } 
             });
 
             if (!customer){
@@ -48,9 +48,6 @@ export class CustomerRepository implements CustomerRepositoryInterface {
     async getAll(): Promise<CustomerInterface[]> {
         try {
             return await prisma.customer.findMany({
-                where: { 
-                    is_blocked: false 
-                },
                 orderBy: {
                     createdAt: 'desc'
                 }
@@ -120,9 +117,11 @@ export class CustomerRepository implements CustomerRepositoryInterface {
         try {
             const customer = await prisma.customer.update({
                 where: { id },
-                data: { is_blocked: true }
+                data: { 
+                    is_blocked: true,
+                    updatedAt: new Date()
+                }
             })
-
             if (!customer){
                 throw new Error("Customer not found")
             }
