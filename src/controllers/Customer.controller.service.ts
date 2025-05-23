@@ -72,10 +72,11 @@ export class CustomerControllerService {
                 customer: this.repository.toResponseObject(customer)
             })
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             res.status(500).json({ 
                 message: "Error getting customer",
-                error: error
-            })
+                error: errorMessage 
+            });
         }
     }
 
@@ -88,10 +89,11 @@ export class CustomerControllerService {
                 customers: customers.map(customer => this.repository.toResponseObject(customer))
             })
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             res.status(500).json({ 
                 message: "Error getting customers",
-                error: error
-            })
+                error: errorMessage 
+            });
         }
     }
 
@@ -114,10 +116,11 @@ export class CustomerControllerService {
                 customer: this.repository.toResponseObject(updatedCustomer)
             })
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             res.status(500).json({ 
                 message: "Error updating customer",
-                error: error
-            })
+                error: errorMessage 
+            });
         }
     }
 
@@ -139,10 +142,11 @@ export class CustomerControllerService {
                 customer: this.repository.toResponseObject(deletedCustomer)
             })
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             res.status(500).json({ 
                 message: "Error deleting customer",
-                error: error
-            })
+                error: errorMessage 
+            });
         }
     }
 
@@ -164,10 +168,11 @@ export class CustomerControllerService {
                 customer: this.repository.toResponseObject(blockedCustomer)
             })
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             res.status(500).json({ 
                 message: "Error blocking customer",
-                error: error
-            })
+                error: errorMessage 
+            });
         }
     }
 
@@ -187,10 +192,11 @@ export class CustomerControllerService {
                 customer: this.repository.toResponseObject(customer)
             })
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             res.status(500).json({ 
                 message: "Error getting customer",
-                error: error
-            })
+                error: errorMessage 
+            });
         }
     }
 
@@ -210,10 +216,11 @@ export class CustomerControllerService {
                 customer: this.repository.toResponseObject(customer)
             })
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             res.status(500).json({ 
                 message: "Error getting customer",
-                error: error
-            })
+                error: errorMessage 
+            });
         }
     }
 }
