@@ -17,7 +17,7 @@ export class CustomerRepository implements CustomerRepositoryInterface {
                     phone: customer.phone!,
                     email: customer.email!,
                     is_foreign: customer.is_foreign!,
-                    is_blocked: customer.is_blocked!,
+                    is_blocked: false,
                     createdAt: new Date(),
                     updatedAt: new Date()
                 }
@@ -32,7 +32,7 @@ export class CustomerRepository implements CustomerRepositoryInterface {
     async get(id: number): Promise<CustomerInterface> {
         try {
             const customer = await prisma.customer.findUnique({ 
-                where: { id } 
+                where: { id, is_blocked: false } 
             });
 
             if (!customer){
@@ -48,6 +48,9 @@ export class CustomerRepository implements CustomerRepositoryInterface {
     async getAll(): Promise<CustomerInterface[]> {
         try {
             return await prisma.customer.findMany({
+                where: { 
+                    is_blocked: false 
+                },
                 orderBy: {
                     createdAt: 'desc'
                 }
@@ -122,8 +125,25 @@ export class CustomerRepository implements CustomerRepositoryInterface {
         }
     }
 
+    async blockCustomer(id: number): Promise<CustomerInterface> {
+        try {
+            const customer = await prisma.customer.update({
+                where: { id },
+                data: { is_blocked: true }
+            })
+
+            if (!customer){
+                throw new Error("Customer not found")
+            }
+
+            return customer
+        } catch (error) {
+            throw error
+        }
+    }
+
     toResponseObject(customer: CustomerInterface): CustomerResponseInterface {
-        const { id, name, lastname, document, type_document, phone, email, is_foreign, is_blocked, createdAt, updatedAt } = customer;
-        return { id: id!, name, lastname, document, type_document, phone, email, is_foreign, is_blocked, createdAt: createdAt!, updatedAt: updatedAt! };
+        const { id, name, lastname, document, type_document, phone, email, is_foreign, createdAt, updatedAt } = customer;
+        return { id: id!, name, lastname, document, type_document, phone, email, is_foreign, createdAt: createdAt!, updatedAt: updatedAt! };
     }
 }
