@@ -3,6 +3,7 @@ export interface VehicleInterface {
     model: string;
     year: number;
     brand: string;
+    availability: string
 }
 
 export interface VehicleResponseInterface {
@@ -10,4 +11,5 @@ export interface VehicleResponseInterface {
     model: string;
     year: number;
     brand: string;
+    availability: string
 }

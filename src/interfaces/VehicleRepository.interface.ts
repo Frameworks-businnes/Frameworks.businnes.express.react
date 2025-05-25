@@ -10,5 +10,7 @@ export interface VehicleRepositoryInterface {
     getByBrand(brand: string): Promise<VehicleInterface[]>;
     getByModel(model: string): Promise<VehicleInterface[]>;
     getByYear(year: number): Promise<VehicleInterface[]>;
+    getByavailability(availability: string): Promise<VehicleInterface[]>;
+    
 
 }
