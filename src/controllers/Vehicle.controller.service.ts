@@ -11,17 +11,17 @@ export class VehicleControllerService {
     }
 
     async create(req: Request, res: Response): Promise<void> {
-        const { model, year, brand } = req.body;
+        const { model, year, brand, availability } = req.body;
 
-        if (!model || !year || !brand) {
+        if (!model || !year || !brand || !availability ) {
             res.status(400).json({
-                message: "Model, year and brand are required"
+                message: "Model, year, brand and availability are required"
             });
             return;
         }
 
         try {
-            const vehicle = await this.repository.create({ model, year, brand });
+            const vehicle = await this.repository.create({ model, year, brand, availability });
 
             res.status(201).json({
                 message: "Vehicle created successfully",
@@ -81,11 +81,11 @@ export class VehicleControllerService {
     }
     async update(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
-        const { model, year, brand } = req.body;
+        const { model, year, brand, availability} = req.body;
 
-        if (!model || !year || !brand) {
+        if (!model || !year || !brand || !availability) {
             res.status(400).json({
-                message: "Model, year and brand are required"
+                message: "Model, year, brand and availability are required"
             });
             return;
         }
