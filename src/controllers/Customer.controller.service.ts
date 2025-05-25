@@ -43,6 +43,8 @@ export class CustomerControllerService {
             if (existingDocument) {
                 return res.status(400).json({ message: "Document already exists" });
             }
+
+            const isForeignBool = is_foreign === "true" || is_foreign === true
             
             const customer = await this.repository.create({
                 name,
@@ -53,7 +55,7 @@ export class CustomerControllerService {
                 license: licenseFile ? `/uploads/${licenseFile.filename}` : undefined,
                 phone,
                 email,
-                is_foreign
+                is_foreign: isForeignBool
             });
 
             return res.status(201).json({
