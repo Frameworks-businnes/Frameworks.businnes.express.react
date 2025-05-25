@@ -6,28 +6,33 @@ import { AuthMiddleware } from "../middlewares/Auth.middleware";
 export class VehicleRoutes {
     private controller: VehicleControllerService;
     private router: express.Router;
-    private middlewareAuth : AuthMiddleware;
+    private middlewareAuth: AuthMiddleware;
 
     constructor(
         controller: VehicleControllerService,
         router: express.Router,
-        middlewareAuth : AuthMiddleware
-    ){
+        middlewareAuth: AuthMiddleware
+    ) {
         this.controller = controller;
         this.router = router;
         this.middlewareAuth = middlewareAuth
     }
 
-    initRoutes(){
+    initRoutes() {
         try {
+            // Rutas específicas de búsqueda
+            this.router.get("/vehicles/brand/:brand", this.middlewareAuth.authenticate, (req, res) => this.controller.getByBrand(req, res));
+            this.router.get("/vehicles/model/:model", this.middlewareAuth.authenticate, (req, res) => this.controller.getByModel(req, res));
+            this.router.get("/vehicles/year/:year", this.middlewareAuth.authenticate, (req, res) => this.controller.getByYear(req, res));
+
             // Public routes
-            this.router.post("/vehicles", this.middlewareAuth.authenticate , (req, res) => this.controller.create(req, res));
-            
+            this.router.post("/vehicles", this.middlewareAuth.authenticate, (req, res) => this.controller.create(req, res));
+
             // Protected routes
             this.router.get("/vehicles", this.middlewareAuth.authenticate, (req, res) => this.controller.getAll(req, res));
-            this.router.get("/vehicles/:id", this.middlewareAuth.authenticate ,(req, res) => this.controller.getById(req, res));
-            this.router.put("/vehicles/:id", this.middlewareAuth.authenticate,(req, res) => this.controller.update(req, res));
-            this.router.delete("/vehicles/:id", this.middlewareAuth.authenticate ,(req, res) => this.controller.delete(req, res));
+            this.router.get("/vehicles/:id", this.middlewareAuth.authenticate, (req, res) => this.controller.getById(req, res));
+            this.router.put("/vehicles/:id", this.middlewareAuth.authenticate, (req, res) => this.controller.update(req, res));
+            this.router.delete("/vehicles/:id", this.middlewareAuth.authenticate, (req, res) => this.controller.delete(req, res));
 
             return this.router;
         } catch (error) {
