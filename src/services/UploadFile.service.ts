@@ -12,7 +12,24 @@ const storage = multer.diskStorage({
   }
 });
 
-export const upload = multer({ 
+export const uploadDocument = multer({ 
   storage,
+  fileFilter: (req, file, cb) => {
+    if (file.fieldname === 'file_document' && !file.mimetype.includes('pdf')) {
+      return cb(new Error('Solo se permiten documentos PDF'));
+    }
+    cb(null, true);
+  },
   limits: { fileSize: 5 * 1024 * 1024 }
-});
+}).single('file_document');
+
+export const uploadLicense = multer({ 
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (file.fieldname === 'license' && !file.mimetype.includes('pdf')) {
+      return cb(new Error('Solo se permiten documentos PDF'));
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }
+}).single('license');

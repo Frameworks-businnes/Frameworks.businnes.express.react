@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { CustomerRepository } from "../repositories/Customer.repository" 
 import { CustomerInterface } from "../interfaces/Customer.interface"
-import { upload } from "../services/UploadFile.service"
+import { uploadDocument, uploadLicense } from "../services/UploadFile.service"
 
 export class CustomerControllerService {
     private repository: CustomerRepository
@@ -11,37 +11,24 @@ export class CustomerControllerService {
     }
 
     async create(req: Request, res: Response): Promise<void> {
-        upload.fields([
-            { name: "file_document", maxCount: 1 },
-            { name: "license", maxCount: 1 }
-        ])(req, res, async (err) => {
         try {
-            if (err) {
-                return res.status(400).json({ message: err.message });
-            }
-
             const { name, lastname, document, type_document, phone, email, is_foreign } = req.body;
 
             if (!name || !lastname || !document || !type_document || !phone || !email || is_foreign === null) {
-                return res.status(400).json({ message: "Missing required fields" });
+                res.status(400).json({ message: "Missing required fields" });
+                return
             }
-
-            const files = req.files as {
-                file_document?: Express.Multer.File[];
-                license?: Express.Multer.File[];
-            };
-
-            const documentFile = files.file_document?.[0];
-            const licenseFile = files.license?.[0];
 
             const existingEmail = await this.repository.getByEmail(email);
             if (existingEmail) {
-                return res.status(400).json({ message: "Email already exists" });
+                res.status(400).json({ message: "Email already exists" });
+                return
             }
 
             const existingDocument = await this.repository.getByDocument(document);
             if (existingDocument) {
-                return res.status(400).json({ message: "Document already exists" });
+                res.status(400).json({ message: "Document already exists" });
+                return
             }
 
             const isForeignBool = is_foreign === "true" || is_foreign === true
@@ -51,27 +38,24 @@ export class CustomerControllerService {
                 lastname,
                 document,
                 type_document,
-                file_document: documentFile ? `/uploads/${documentFile.filename}` : undefined,
-                license: licenseFile ? `/uploads/${licenseFile.filename}` : undefined,
                 phone,
                 email,
                 is_foreign: isForeignBool
             });
 
-            return res.status(201).json({
+            res.status(201).json({
                 message: "Customer created successfully",
                 customer: this.repository.toResponseObject(customer)
             });
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-            return res.status(500).json({ 
+            res.status(500).json({ 
                 message: "Error creating customer",
                 error: errorMessage 
             });
         }
-    });
-}
+    }
 
     async getById(req: Request, res: Response): Promise<void> {
         const { id } = req.params
@@ -137,6 +121,68 @@ export class CustomerControllerService {
             res.status(500).json({ 
                 message: "Error updating customer",
                 error: errorMessage 
+            });
+        }
+    }
+
+    async updateDocument(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            
+            uploadDocument(req, res, async (err) => {
+                if (err) {
+                    return res.status(400).json({ message: err.message });
+                }
+
+                if (!req.file) {
+                    return res.status(400).json({ message: "No se proporcionó archivo" });
+                }
+
+                const updatedCustomer = await this.repository.updateDocument(
+                    Number(id),
+                    `/uploads/${req.file.filename}`
+                );
+
+                res.status(200).json({
+                    message: "Documento actualizado correctamente",
+                    customer: this.repository.toResponseObject(updatedCustomer)
+                });
+            });
+        } catch (error) {
+            res.status(500).json({ 
+                message: "Error al actualizar documento",
+                error: error instanceof Error ? error.message : 'Error desconocido'
+            });
+        }
+    }
+
+    async updateLicense(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            
+            uploadLicense(req, res, async (err) => {
+                if (err) {
+                    return res.status(400).json({ message: err.message });
+                }
+
+                if (!req.file) {
+                    return res.status(400).json({ message: "No se proporcionó archivo de licencia" });
+                }
+
+                const updatedCustomer = await this.repository.updateLicense(
+                    Number(id),
+                    `/uploads/${req.file.filename}`
+                );
+
+                res.status(200).json({
+                    message: "Licencia actualizada correctamente",
+                    customer: this.repository.toResponseObject(updatedCustomer)
+                });
+            });
+        } catch (error) {
+            res.status(500).json({ 
+                message: "Error al actualizar licencia",
+                error: error instanceof Error ? error.message : 'Error desconocido'
             });
         }
     }

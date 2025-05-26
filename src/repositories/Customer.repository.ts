@@ -8,25 +8,31 @@ export class CustomerRepository implements CustomerRepositoryInterface {
 
     async create(customer: Partial<CustomerInterface>): Promise<CustomerInterface> {
         try {
+            if (!customer.name || !customer.lastname || !customer.document || 
+                !customer.type_document || !customer.phone || !customer.email || 
+                customer.is_foreign === undefined) {
+                throw new Error("Faltan campos requeridos");
+            }
+
             const newCustomer = await prisma.customer.create({
                 data: {
-                    name: customer.name!,
-                    lastname: customer.lastname!,
-                    document: customer.document!,
-                    type_document: customer.type_document!,
-                    file_document: customer.file_document!,
-                    license: customer.license!,
-                    phone: customer.phone!,
-                    email: customer.email!,
-                    is_foreign: customer.is_foreign!,
+                    name: customer.name,
+                    lastname: customer.lastname,
+                    document: customer.document,
+                    type_document: customer.type_document,
+                    file_document: customer.file_document || "", 
+                    license: customer.license || "",
+                    phone: customer.phone,
+                    email: customer.email,
+                    is_foreign: Boolean(customer.is_foreign),       // Conversión explícita a booleano
                     is_blocked: false,
                     createdAt: new Date(),
                     updatedAt: new Date()
                 }
-            })
+            });
             return newCustomer;
         } catch (error) {
-            throw error;
+            throw error
         }
     }
 
@@ -66,6 +72,44 @@ export class CustomerRepository implements CustomerRepositoryInterface {
                 data: customer
             })
 
+            if (!updatedCustomer){
+                throw new Error("Customer not found")
+            }
+
+            return updatedCustomer
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async updateDocument(id: number, file_document: string): Promise<CustomerInterface> {
+        try {
+            const updatedCustomer = await prisma.customer.update({
+                where: { id },
+                data: { 
+                    file_document,
+                    updatedAt: new Date()
+                }
+            })
+            if (!updatedCustomer){
+                throw new Error("Customer not found")
+            }
+
+            return updatedCustomer
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async updateLicense(id: number, license: string): Promise<CustomerInterface> {
+        try {
+            const updatedCustomer = await prisma.customer.update({
+                where: { id },
+                data: { 
+                    license,
+                    updatedAt: new Date()
+                }
+            })
             if (!updatedCustomer){
                 throw new Error("Customer not found")
             }

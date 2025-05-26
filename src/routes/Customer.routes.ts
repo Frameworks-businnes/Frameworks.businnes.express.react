@@ -31,6 +31,10 @@ export class CustomerRoutes {
                 this.controller.getByDocument(req, res))
             this.router.put("/customers/block/:id", (req: Request, res: Response) => 
                 this.controller.blockCustomer(req, res))
+            this.router.put("/customers/document/:id", (req: Request, res: Response) => 
+                this.controller.updateDocument(req, res))
+            this.router.put("/customers/license/:id", (req: Request, res: Response) => 
+                this.controller.updateLicense(req, res))
 
             return this.router
         } catch (error) {
