@@ -24,7 +24,7 @@ export class CustomerRepository implements CustomerRepositoryInterface {
                     license: customer.license || "",
                     phone: customer.phone,
                     email: customer.email,
-                    is_foreign: Boolean(customer.is_foreign),       // Conversión explícita a booleano
+                    is_foreign: Boolean(customer.is_foreign), 
                     is_blocked: false,
                     createdAt: new Date(),
                     updatedAt: new Date()
