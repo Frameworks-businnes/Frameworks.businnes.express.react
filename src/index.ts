@@ -18,9 +18,16 @@ import { VehicleRepository } from "./repositories/Vehicle.repository";
 import { VehicleControllerService } from "./controllers/Vehicle.controller.service";
 import { VehicleRoutes } from "./routes/Vehicle.routes";
 
+<<<<<<< HEAD
 import { CustomerControllerService } from "./controllers/Customer.controller.service";
 import { CustomerRoutes } from "./routes/Customer.routes";
 import { CustomerRepository } from "./repositories/Customer.repository";
+=======
+import { BookingControllerService } from "./controllers/Booking.controller.service";
+import { BookingRepository } from "./repositories/Booking.repository";
+import { BookingRoutes } from "./routes/Booking.routes";
+
+>>>>>>> 3ce75d1 (implement-crud-booking)
 class Server {
     private server: express.Application;
     private port: typeof Enviroments.PORT;
@@ -63,10 +70,18 @@ class Server {
 
             const customerRoutes = new CustomerRoutes(customerController, express.Router()); 
 
+            const bookingRepository = new BookingRepository();
+            const bookingController = new BookingControllerService(bookingRepository);
+            
+            const bookingRoutes = new BookingRoutes(bookingController, express.Router(), authMiddleware);
+
+
             this.server.use("/api", userRoutes.initRoutes());
             this.server.use("/api/auth", authRoutes.initRoutes());
 
             this.server.use("/api", vehicleRoutes.initRoutes());
+
+            this.server.use("/api", bookingRoutes.initRoutes());
             
             this.server.use("/api", customerRoutes.initRoutes());
 
