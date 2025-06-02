@@ -12,7 +12,7 @@ export class VehicleRepository implements VehicleRepositoryInterface {
                     model: vehicle.model!,
                     year: vehicle.year!,
                     brand: vehicle.brand!,
-                    availability: vehicle.availability !== undefined ? vehicle.availability : true // Default to true if not provided
+                    availability: vehicle.availability || 'available' // Default to 'available' if not provided
                 }
             });
 
@@ -85,16 +85,18 @@ export class VehicleRepository implements VehicleRepositoryInterface {
             throw error;
         }
     }
-    async getByavailability(availability: boolean): Promise<VehicleInterface[]> {
+
+    async getByavailability(availability: string): Promise<VehicleInterface[]> {
         try {
             return await prisma.vehicle.findMany({ where: { availability } });
         } catch (error) {
             throw error;
         }
     }
+
     toResponseObject(vehicle: VehicleInterface): VehicleResponseInterface {
-        const { id, model, year, brand } = vehicle;
-        return { id: id!, model, year, brand };
+        const { id, model, year, brand, availability } = vehicle;
+        return { id: id!, model, year, brand, availability };
     }
 }
 

@@ -4,12 +4,9 @@ import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 
-
 import { UserControllerService } from "./controllers/User.controller.service";
 import { AuthControllerService } from "./controllers/Auth.controller.service";
-
 import { UserRepository } from './repositories/User.repository';
-
 import { UserRoutes } from "./routes/User.routes";
 import { AuthRoutes } from "./routes/Auth.routes";
 import { AuthMiddleware } from "./middlewares/Auth.middleware";
@@ -18,16 +15,14 @@ import { VehicleRepository } from "./repositories/Vehicle.repository";
 import { VehicleControllerService } from "./controllers/Vehicle.controller.service";
 import { VehicleRoutes } from "./routes/Vehicle.routes";
 
-<<<<<<< HEAD
 import { CustomerControllerService } from "./controllers/Customer.controller.service";
 import { CustomerRoutes } from "./routes/Customer.routes";
 import { CustomerRepository } from "./repositories/Customer.repository";
-=======
+
 import { BookingControllerService } from "./controllers/Booking.controller.service";
 import { BookingRepository } from "./repositories/Booking.repository";
 import { BookingRoutes } from "./routes/Booking.routes";
 
->>>>>>> 3ce75d1 (implement-crud-booking)
 class Server {
     private server: express.Application;
     private port: typeof Enviroments.PORT;
@@ -42,7 +37,6 @@ class Server {
 
     initServer() {
         try {
-
             this.server.use(json());
             this.server.use(cors({
                 origin: 'http://localhost:5173', 
@@ -62,27 +56,20 @@ class Server {
 
             const vehicleRepository = new VehicleRepository();
             const vehicleController = new VehicleControllerService(vehicleRepository);
-            
             const vehicleRoutes = new VehicleRoutes(vehicleController, express.Router(), authMiddleware);
             
             const customerRepository = new CustomerRepository();
             const customerController = new CustomerControllerService(customerRepository);
-
-            const customerRoutes = new CustomerRoutes(customerController, express.Router()); 
+            const customerRoutes = new CustomerRoutes(customerController, express.Router());
 
             const bookingRepository = new BookingRepository();
             const bookingController = new BookingControllerService(bookingRepository);
-            
             const bookingRoutes = new BookingRoutes(bookingController, express.Router(), authMiddleware);
-
 
             this.server.use("/api", userRoutes.initRoutes());
             this.server.use("/api/auth", authRoutes.initRoutes());
-
             this.server.use("/api", vehicleRoutes.initRoutes());
-
             this.server.use("/api", bookingRoutes.initRoutes());
-            
             this.server.use("/api", customerRoutes.initRoutes());
 
             this.server.listen(this.port, () => {
