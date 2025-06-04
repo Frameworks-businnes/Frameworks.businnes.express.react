@@ -1,16 +1,17 @@
-import { VehicleInterface } from './Vehicle.interface';
+import { Vehicle } from './Vehicle.interface';
 
 export interface VehicleRepositoryInterface {
 
-    create(vehicle: Partial<VehicleInterface>): Promise<VehicleInterface>;
-    get(id: number): Promise<VehicleInterface>;
-    getAll(): Promise<VehicleInterface[]>;
-    update(id: number, vehicle: Partial<VehicleInterface>): Promise<VehicleInterface>;
-    delete(id: number): Promise<VehicleInterface>;
-    getByBrand(brand: string): Promise<VehicleInterface[]>;
-    getByModel(model: string): Promise<VehicleInterface[]>;
-    getByYear(year: number): Promise<VehicleInterface[]>;
-    getByavailability(availability: string): Promise<VehicleInterface[]>;
+    create(vehicle: Partial<Vehicle>): Promise<Vehicle>;
+    get(id: number): Promise<Vehicle>;
+    getAll(): Promise<Vehicle[]>;
+    update(id: number, vehicle: Partial<Vehicle>): Promise<Vehicle>;
+    delete(id: number): Promise<Vehicle>;
+    getByBrand(brand: string): Promise<Vehicle[]>;
+    getByModel(model: string): Promise<Vehicle[]>;
+    getByYear(year: number): Promise<Vehicle[]>;
+    getByavailability(availability: string): Promise<Vehicle[]>;
+    toResponseObject(vehicle: Vehicle | Vehicle[]): { data: Vehicle | Vehicle[] };
     
 
 }

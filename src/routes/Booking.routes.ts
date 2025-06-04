@@ -29,6 +29,15 @@ export class BookingRoutes {
             this.router.put("/bookings/:id", this.middlewareAuth.authenticate,(req, res) => this.controller.update(req, res));
             this.router.delete("/bookings/:id", this.middlewareAuth.authenticate ,(req, res) => this.controller.delete(req, res));
 
+            // New route to convert a booking to a rental
+            this.router.post("/bookings/:id/convert-to-rental", this.middlewareAuth.authenticate, (req, res) => this.controller.convertToRental(req, res));
+
+            // New route to cancel a booking
+            this.router.put("/bookings/:id/cancel", this.middlewareAuth.authenticate, (req, res) => this.controller.cancelBooking(req, res));
+
+            // New route to generate rental PDF
+            this.router.get("/bookings/:id/generate-rental-pdf", this.middlewareAuth.authenticate, (req, res) => this.controller.generateRentalPdf(req, res));
+
             return this.router;
         } catch (error) {
             throw new Error(`${error}`);

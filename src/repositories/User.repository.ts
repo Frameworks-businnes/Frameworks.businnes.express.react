@@ -1,8 +1,8 @@
-
 import { PrismaClient } from "../generated/prisma";
 import { UserInterface, UserResponseInterface } from "../interfaces/User.interface";
 import { UserRepositoryInterface } from "../interfaces/UserRepository.interface";
 import { AuthService } from "../services/Auth.service";
+import { UserRole } from "../middlewares/Role.middleware";
 
 const prisma = new PrismaClient();
 
@@ -20,12 +20,15 @@ export class UserRepository implements UserRepositoryInterface {
                     email: user.email!,
                     name: user.name!,
                     password: hashedPassword,
+                    role: user.role || "client",
                     updatedAt : new Date
                     
                 }
             });
 
-            return newUser;
+            const userWithRole: UserInterface = { ...newUser, role: newUser.role as (string | null) };
+
+            return userWithRole;
         } catch (error) {
             if (error instanceof Error && error.message.includes('Unique constraint')) {
                 throw new Error("Email already exists");
@@ -44,7 +47,9 @@ export class UserRepository implements UserRepositoryInterface {
                 throw new Error("User not found");
             }
 
-            return user;
+            const userWithRole: UserInterface = { ...user, role: user.role as (string | null) };
+            return userWithRole;
+
         } catch (error) {
             throw error;
         }
@@ -60,7 +65,9 @@ export class UserRepository implements UserRepositoryInterface {
                 throw new Error("User not found");
             }
 
-            return user;
+            const userWithRole: UserInterface = { ...user, role: user.role as (string | null) };
+            return userWithRole;
+
         } catch (error) {
             throw error;
         }
@@ -68,11 +75,19 @@ export class UserRepository implements UserRepositoryInterface {
 
     async getAll(): Promise<UserInterface[]> {
         try {
-            return await prisma.user.findMany({
+            const users = await prisma.user.findMany({
                 orderBy: {
                     createdAt: 'desc'
                 }
             });
+
+            const usersWithRole: UserInterface[] = users.map(user => ({
+                ...user, 
+                role: user.role as (string | null)
+            }));
+
+            return usersWithRole;
+
         } catch (error) {
             throw error;
         }
@@ -85,16 +100,25 @@ export class UserRepository implements UserRepositoryInterface {
                 user.password = await AuthService.hashPassword(user.password);
             }
 
+            const dataToUpdate: any = { ...user };
+            delete dataToUpdate.role;
+
+            if (user.role !== undefined && user.role !== null) {
+                dataToUpdate.role = user.role;
+            }
+
             const updatedUser = await prisma.user.update({
                 where: { id },
-                data: { ...user }
+                data: dataToUpdate,
             });
 
             if (!updatedUser) {
                 throw new Error("User not found");
             }
 
-            return updatedUser;
+            const userWithRole: UserInterface = { ...updatedUser, role: updatedUser.role as (string | null) };
+            return userWithRole;
+
         } catch (error) {
             throw error;
         }
@@ -110,15 +134,16 @@ export class UserRepository implements UserRepositoryInterface {
                 throw new Error("User not found");
             }
 
-            return deletedUser;
+            const userWithRole: UserInterface = { ...deletedUser, role: deletedUser.role as (string | null) };
+            return userWithRole;
+
         } catch (error) {
             throw error;
         }
     }
 
-
     toResponseObject(user: UserInterface): UserResponseInterface {
-        const { id, name, email, createdAt, updatedAt } = user;
-        return { id: id!, name, email, createdAt: createdAt!, updatedAt: updatedAt! };
+        const { id, name, email, createdAt, updatedAt, role } = user;
+        return { id: id!, name, email, createdAt: createdAt!, updatedAt: updatedAt!, role: role };
     }
 }

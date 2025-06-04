@@ -11,7 +11,6 @@ export class AuthMiddleware {
 
     authenticate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-
             const token = req.cookies.token;
 
             if (!token) {
@@ -22,14 +21,11 @@ export class AuthMiddleware {
             }
 
             try {
-
                 const decoded = AuthService.verifyToken(token);
-                
                 const user = await this.userRepository.get(decoded.userId);
-                
                 (req as any).user = user;
-                
                 next();
+                return;
             } catch (error) {
                 res.clearCookie('token');
                 res.status(401).json({
@@ -42,6 +38,7 @@ export class AuthMiddleware {
                 message: "Server error",
                 error: error
             });
+            return;
         }
     };
 }

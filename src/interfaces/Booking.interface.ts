@@ -5,6 +5,10 @@ export interface BookingInterface {
     startDate: Date;
     endDate: Date;
     price: number;
+    status: string;
+    availability?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface BookingResponseInterface {
@@ -14,4 +18,7 @@ export interface BookingResponseInterface {
     startDate: Date;
     endDate: Date;
     price: number;
+    status: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }

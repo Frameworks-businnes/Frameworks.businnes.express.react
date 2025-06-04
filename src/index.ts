@@ -63,7 +63,7 @@ class Server {
             const customerRoutes = new CustomerRoutes(customerController, express.Router());
 
             const bookingRepository = new BookingRepository();
-            const bookingController = new BookingControllerService(bookingRepository);
+            const bookingController = new BookingControllerService(bookingRepository, vehicleRepository);
             const bookingRoutes = new BookingRoutes(bookingController, express.Router(), authMiddleware);
 
             this.server.use("/api", userRoutes.initRoutes());
