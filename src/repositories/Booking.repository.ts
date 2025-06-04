@@ -48,7 +48,7 @@ export class BookingRepository implements BookingRepositoryInterface {
                     createdAt: 'desc'
                 },
                 include: {
-                    vehicle: true
+                    Vehicle: true
                 }
             });
             return bookings.map(booking => this.toBookingInterface(booking));
@@ -92,7 +92,7 @@ export class BookingRepository implements BookingRepositoryInterface {
             const bookings = await prisma.booking.findMany({
                 where: { userId: userid },
                 include: {
-                    vehicle: true
+                    Vehicle: true
                 }
             });
             return bookings.map(booking => this.toBookingInterface(booking));

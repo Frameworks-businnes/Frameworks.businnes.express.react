@@ -11,6 +11,7 @@ export class CompanyRepository {
     async create(companyData: CompanyInterface): Promise<CompanyInterface> {
         try {
             const company = await this.prisma.company.create({
+                //@ts-ignore
                 data: {
                     name: companyData.name,
                     description: companyData.description,
