@@ -23,6 +23,10 @@ import { BookingControllerService } from "./controllers/Booking.controller.servi
 import { BookingRepository } from "./repositories/Booking.repository";
 import { BookingRoutes } from "./routes/Booking.routes";
 
+import { CompanyRepository } from "./repositories/Company.repository";
+import { CompanyController } from "./controllers/Company.controller";
+import { CompanyRoutes } from "./routes/Company.routes";
+
 class Server {
     private server: express.Application;
     private port: typeof Enviroments.PORT;
@@ -63,14 +67,19 @@ class Server {
             const customerRoutes = new CustomerRoutes(customerController, express.Router());
 
             const bookingRepository = new BookingRepository();
-            const bookingController = new BookingControllerService(bookingRepository, vehicleRepository);
+            const companyRepository = new CompanyRepository();
+            const bookingController = new BookingControllerService(bookingRepository, vehicleRepository, companyRepository);
             const bookingRoutes = new BookingRoutes(bookingController, express.Router(), authMiddleware);
+
+            const companyController = new CompanyController(companyRepository);
+            const companyRoutes = new CompanyRoutes(companyController, express.Router());
 
             this.server.use("/api", userRoutes.initRoutes());
             this.server.use("/api/auth", authRoutes.initRoutes());
             this.server.use("/api", vehicleRoutes.initRoutes());
             this.server.use("/api", bookingRoutes.initRoutes());
             this.server.use("/api", customerRoutes.initRoutes());
+            this.server.use("/api", companyRoutes.initRoutes());
 
             this.server.listen(this.port, () => {
                 console.log(`Server running at http://localhost:${this.port}`);

@@ -12,6 +12,15 @@ export class UserRepository implements UserRepositoryInterface {
             if (!user.password) {
                 throw new Error("Password is required");
             }
+
+            // Verificar si el email ya existe
+            const existingUser = await prisma.user.findUnique({
+                where: { email: user.email }
+            });
+
+            if (existingUser) {
+                throw new Error("Email already exists");
+            }
            
             const hashedPassword = await AuthService.hashPassword(user.password);
             
@@ -21,16 +30,19 @@ export class UserRepository implements UserRepositoryInterface {
                     name: user.name!,
                     password: hashedPassword,
                     role: user.role || "client",
-                    updatedAt : new Date
-                    
+                    updatedAt: new Date()
                 }
             });
 
-            const userWithRole: UserInterface = { ...newUser, role: newUser.role as (string | null) };
+            const userWithRole: UserInterface = { 
+                ...newUser, 
+                role: newUser.role as (string | null) 
+            };
 
             return userWithRole;
-        } catch (error) {
-            if (error instanceof Error && error.message.includes('Unique constraint')) {
+        } catch (error: any) {
+            // Mejorar manejo de errores de Prisma
+            if (error.code === 'P2002' || error.message.includes('Unique constraint')) {
                 throw new Error("Email already exists");
             }
             throw error;
@@ -47,7 +59,10 @@ export class UserRepository implements UserRepositoryInterface {
                 throw new Error("User not found");
             }
 
-            const userWithRole: UserInterface = { ...user, role: user.role as (string | null) };
+            const userWithRole: UserInterface = { 
+                ...user, 
+                role: user.role as (string | null) 
+            };
             return userWithRole;
 
         } catch (error) {
@@ -65,7 +80,10 @@ export class UserRepository implements UserRepositoryInterface {
                 throw new Error("User not found");
             }
 
-            const userWithRole: UserInterface = { ...user, role: user.role as (string | null) };
+            const userWithRole: UserInterface = { 
+                ...user, 
+                role: user.role as (string | null) 
+            };
             return userWithRole;
 
         } catch (error) {
@@ -95,55 +113,112 @@ export class UserRepository implements UserRepositoryInterface {
 
     async update(id: number, user: Partial<UserInterface>): Promise<UserInterface> {
         try {
+            // Verificar que el usuario existe
+            const existingUser = await prisma.user.findUnique({
+                where: { id }
+            });
 
-            if (user.password) {
-                user.password = await AuthService.hashPassword(user.password);
+            if (!existingUser) {
+                throw new Error("User not found");
             }
 
-            const dataToUpdate: any = { ...user };
-            delete dataToUpdate.role;
+            // Preparar datos para actualizar
+            const dataToUpdate: any = {
+                updatedAt: new Date()
+            };
 
-            if (user.role !== undefined && user.role !== null) {
-                dataToUpdate.role = user.role;
+            // Solo actualizar campos que están presentes
+            if (user.name !== undefined) dataToUpdate.name = user.name;
+            if (user.email !== undefined) {
+                // Verificar que el email no esté en uso por otro usuario
+                if (user.email !== existingUser.email) {
+                    const emailInUse = await prisma.user.findUnique({
+                        where: { email: user.email }
+                    });
+                    if (emailInUse) {
+                        throw new Error("Email already exists");
+                    }
+                }
+                dataToUpdate.email = user.email;
             }
+            if (user.password !== undefined) {
+                dataToUpdate.password = await AuthService.hashPassword(user.password);
+            }
+            if (user.role !== undefined) dataToUpdate.role = user.role;
 
             const updatedUser = await prisma.user.update({
                 where: { id },
                 data: dataToUpdate,
             });
 
-            if (!updatedUser) {
-                throw new Error("User not found");
-            }
-
-            const userWithRole: UserInterface = { ...updatedUser, role: updatedUser.role as (string | null) };
+            const userWithRole: UserInterface = { 
+                ...updatedUser, 
+                role: updatedUser.role as (string | null) 
+            };
             return userWithRole;
 
-        } catch (error) {
+        } catch (error: any) {
+            if (error.code === 'P2002') {
+                throw new Error("Email already exists");
+            }
+            if (error.code === 'P2025') {
+                throw new Error("User not found");
+            }
             throw error;
         }
     }
 
     async delete(id: number): Promise<UserInterface> {
         try {
+            // Verificar que el usuario existe antes de intentar eliminarlo
+            const existingUser = await prisma.user.findUnique({
+                where: { id }
+            });
+
+            if (!existingUser) {
+                throw new Error("User not found");
+            }
+
+            // Verificar si el usuario tiene bookings asociados
+            const userBookings = await prisma.booking.findMany({
+                where: { userId: id }
+            });
+
+            // Si tiene bookings, no se puede eliminar (opcional - depende de tu lógica de negocio)
+            if (userBookings.length > 0) {
+                throw new Error("Cannot delete user with existing bookings");
+            }
+
             const deletedUser = await prisma.user.delete({
                 where: { id }
             });
 
-            if (!deletedUser) {
-                throw new Error("User not found");
-            }
-
-            const userWithRole: UserInterface = { ...deletedUser, role: deletedUser.role as (string | null) };
+            const userWithRole: UserInterface = { 
+                ...deletedUser, 
+                role: deletedUser.role as (string | null) 
+            };
             return userWithRole;
 
-        } catch (error) {
+        } catch (error: any) {
+            if (error.code === 'P2025') {
+                throw new Error("User not found");
+            }
+            if (error.code === 'P2003') {
+                throw new Error("Cannot delete user with existing bookings");
+            }
             throw error;
         }
     }
 
     toResponseObject(user: UserInterface): UserResponseInterface {
         const { id, name, email, createdAt, updatedAt, role } = user;
-        return { id: id!, name, email, createdAt: createdAt!, updatedAt: updatedAt!, role: role };
+        return { 
+            id: id!, 
+            name, 
+            email, 
+            createdAt: createdAt!, 
+            updatedAt: updatedAt!, 
+            role: role 
+        };
     }
 }

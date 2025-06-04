@@ -38,6 +38,9 @@ export class BookingRoutes {
             // New route to generate rental PDF
             this.router.get("/bookings/:id/generate-rental-pdf", this.middlewareAuth.authenticate, (req, res) => this.controller.generateRentalPdf(req, res));
 
+            // New route to generate all bookings report
+            this.router.get("/bookings/report/pdf", this.middlewareAuth.authenticate, (req, res) => this.controller.generateAllBookingsReport(req, res));
+
             return this.router;
         } catch (error) {
             throw new Error(`${error}`);

@@ -3,6 +3,7 @@ import { BookingRepository } from "../repositories/Booking.repository";
 import { BookingInterface } from "../interfaces/Booking.interface";
 import { BookingRepositoryInterface } from "../interfaces/BookingRepository.interface";
 import { VehicleRepository } from "../repositories/Vehicle.repository";
+import { CompanyRepository } from "../repositories/Company.repository";
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
@@ -12,13 +13,16 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 export class BookingControllerService {
     private repository: BookingRepository;
     private vehicleRepository: VehicleRepository;
+    private companyRepository: CompanyRepository;
 
     constructor(
         repository: BookingRepository,
-        vehicleRepository: VehicleRepository
+        vehicleRepository: VehicleRepository,
+        companyRepository: CompanyRepository
     ) {
         this.repository = repository;   
         this.vehicleRepository = vehicleRepository;
+        this.companyRepository = companyRepository;
     }
     async create(req: Request, res: Response): Promise<void> {
         const { userid, vehicleid, startDate, endDate, price } = req.body;
@@ -285,9 +289,28 @@ export class BookingControllerService {
                  return;
             }
 
+            // Calculate rental duration in days
+            const startDate = new Date(booking.startDate);
+            const endDate = new Date(booking.endDate);
+            const timeDifference = endDate.getTime() - startDate.getTime();
+            const rentalDurationDays = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+
+            let finalPrice = booking.price || 0;
+
+            // Apply 5% extra charge if daily cost is over $50
+            if (rentalDurationDays > 0) {
+                const dailyPrice = finalPrice / rentalDurationDays;
+                if (dailyPrice > 50) {
+                    const extraCharge = finalPrice * 0.05;
+                    finalPrice += extraCharge;
+                    console.log(`Applying 5% extra charge for booking ID ${id}. Original price: ${booking.price}, Daily price: ${dailyPrice.toFixed(2)}, Extra charge: ${extraCharge.toFixed(2)}, Final price: ${finalPrice.toFixed(2)}`);
+                }
+            }
+
             const updatedBooking = await this.repository.update(Number(id), {
                 ...booking,
                 status: 'completed',
+                price: finalPrice, // Update the price with the potential extra charge
             });
 
             // Add this line to update vehicle availability to 'completed'
@@ -360,27 +383,45 @@ export class BookingControllerService {
                  res.status(404).json({ message: "Associated vehicle not found." });
                  return;
             }
-            
-            // Properly typed document definition for pdfmake
+
+            const company = await this.companyRepository.get();
+
             const documentDefinition: any = {
                 content: [
-                    { text: 'Rental Agreement', style: 'header' },
+                    ...(company ? [
+                        { text: 'RENTAL AGREEMENT', style: 'header', alignment: 'center', margin: [0, 0, 0, 20] },
+                        { text: `This Rental Agreement (the "Agreement") is made and entered into this ${new Date().toLocaleDateString()} by and between:`, margin: [0, 0, 0, 10] },
+                        { text: 'LANDLORD:', style: 'subheader' },
+                        { text: company.name, margin: [0, 0, 0, 5] },
+                        { text: company.address, margin: [0, 0, 0, 5] },
+                        { text: `Branch: ${company.branch}`, margin: [0, 0, 0, 5] },
+                        { text: `Phone: ${company.phone}`, margin: [0, 0, 0, 5] },
+                        { text: `Email: ${company.email}`, margin: [0, 0, 0, 10] },
+                        { text: 'AND', alignment: 'center', margin: [0, 10, 0, 10] },
+                        { text: 'TENANT:', style: 'subheader' },
+                        { text: `User ID: ${booking.userid}`, margin: [0, 0, 0, 20] },
+                    ] : [
+                         { text: 'Rental Agreement', style: 'header' },
+                         { text: '[Company information not available]', margin: [0, 0, 0, 20] },
+                    ]),
+                    
                     { text: `Booking ID: ${booking.id}`, margin: [0, 20, 0, 10] },
+                    
                     // Add vehicle details
                     { text: 'Vehicle Details:', style: 'subheader' },
                     { text: `Brand: ${vehicle.brand}` },
                     { text: `Model: ${vehicle.model}` },
                     { text: `Year: ${vehicle.year}` },
-                    // Add user details
-                    { text: 'Customer Details:', style: 'subheader', margin: [0, 10, 0, 10] },
-                    { text: `User ID: ${booking.userid}` },
+
                     // Add rental details
                     { text: 'Rental Period:', style: 'subheader', margin: [0, 10, 0, 10] },
-                    { text: `From: ${booking.startDate.toDateString()}` },
+                    { text: `From: ${new Date(booking.startDate).toDateString()}` },
                     { text: `To: ${new Date(booking.endDate).toDateString()}` },
                     { text: `Total Price: $${booking.price || '0'}`, style: 'total' },
-                    // If payment method and notes are stored with the booking/rental, fetch and include them here.
-                    // Otherwise, they are not available in this GET request.
+
+                    // Add signature section
+                    { text: '\n\n\n_________________________', alignment: 'right', margin: [0, 50, 0, 0] },
+                    { text: 'Client Signature', alignment: 'right' }
                 ],
                 styles: {
                     header: {
@@ -413,6 +454,110 @@ export class BookingControllerService {
             console.error("Error generating rental PDF:", error);
             res.status(500).json({
                 message: "Error generating rental PDF",
+                error: error,
+            });
+        }
+    }
+
+    async generateAllBookingsReport(req: Request, res: Response): Promise<void> {
+        try {
+            const bookings = await this.repository.getAll();
+
+            if (bookings.length === 0) {
+                res.status(404).json({ message: "No bookings found" });
+                return;
+            }
+
+            // Get vehicle details for each booking
+            const bookingsWithVehicles = await Promise.all(
+                bookings.map(async (booking) => {
+                    try {
+                        const vehicle = await this.vehicleRepository.get(booking.vehicleid);
+                        return { booking, vehicle };
+                    } catch (error) {
+                        console.error(`Error fetching vehicle ${booking.vehicleid}:`, error);
+                        return { booking, vehicle: null };
+                    }
+                })
+            );
+
+            // Create summary statistics
+            const totalBookings = bookings.length;
+            const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.price || 0), 0);
+            const pendingBookings = bookings.filter(b => b.status === 'pending').length;
+            const completedBookings = bookings.filter(b => b.status === 'completed').length;
+
+            // Create table data for bookings
+            const tableBody = [
+                ['ID', 'Vehicle', 'Start Date', 'End Date', 'Price', 'Status']
+            ];
+
+            bookingsWithVehicles.forEach(({ booking, vehicle }) => {
+                tableBody.push([
+                    booking.id?.toString() || 'N/A',
+                    vehicle ? `${vehicle.brand} ${vehicle.model} (${vehicle.year})` : 'Vehicle not found',
+                    new Date(booking.startDate).toLocaleDateString(),
+                    new Date(booking.endDate).toLocaleDateString(),
+                    `$${booking.price || 0}`,
+                    booking.status || 'pending'
+                ]);
+            });
+
+            const documentDefinition: any = {
+                content: [
+                    { text: 'All Bookings Report', style: 'header', margin: [0, 0, 0, 20] },
+                    
+                    // Summary section
+                    { text: 'Summary', style: 'subheader', margin: [0, 0, 0, 10] },
+                    { text: `Total Bookings: ${totalBookings}` },
+                    { text: `Total Revenue: $${totalRevenue.toFixed(2)}` },
+                    { text: `Pending Bookings: ${pendingBookings}` },
+                    { text: `Completed Bookings: ${completedBookings}` },
+                    { text: `Report Generated: ${new Date().toLocaleString()}`, margin: [0, 0, 0, 20] },
+                    
+                    // Bookings table
+                    { text: 'Booking Details', style: 'subheader', margin: [0, 20, 0, 10] },
+                    {
+                        table: {
+                            headerRows: 1,
+                            widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto'],
+                            body: tableBody
+                        },
+                        layout: {
+                            fillColor: function (rowIndex: number) {
+                                return (rowIndex === 0) ? '#CCCCCC' : null;
+                            }
+                        }
+                    }
+                ],
+                styles: {
+                    header: {
+                        fontSize: 20,
+                        bold: true,
+                        alignment: 'center'
+                    },
+                    subheader: {
+                        fontSize: 16,
+                        bold: true,
+                    },
+                },
+                pageSize: 'A4',
+                pageOrientation: 'landscape'
+            };
+
+            const pdfDoc = pdfMake.createPdf(documentDefinition);
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename=all_bookings_report_${Date.now()}.pdf`);
+
+            pdfDoc.getBuffer((buffer: Buffer) => {
+                res.send(buffer);
+            });
+
+        } catch (error) {
+            console.error("Error generating all bookings report:", error);
+            res.status(500).json({
+                message: "Error generating all bookings report",
                 error: error,
             });
         }
