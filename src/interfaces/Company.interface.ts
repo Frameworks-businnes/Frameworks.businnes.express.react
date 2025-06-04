@@ -1,9 +1,12 @@
 export interface CompanyInterface {
     id?: number;
     name: string;
-    address: string;
-    branch: string;
-    phone: string;
+    description: string | null;
+    logo: string | null;
+    website: string | null;
     email: string;
-    // Add other fields as needed later
+    phone: string | null;
+    address: string | null;
+    createdAt?: Date;
+    updatedAt?: Date;
 } 

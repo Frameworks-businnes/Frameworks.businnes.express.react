@@ -394,7 +394,6 @@ export class BookingControllerService {
                         { text: 'LANDLORD:', style: 'subheader' },
                         { text: company.name, margin: [0, 0, 0, 5] },
                         { text: company.address, margin: [0, 0, 0, 5] },
-                        { text: `Branch: ${company.branch}`, margin: [0, 0, 0, 5] },
                         { text: `Phone: ${company.phone}`, margin: [0, 0, 0, 5] },
                         { text: `Email: ${company.email}`, margin: [0, 0, 0, 10] },
                         { text: 'AND', alignment: 'center', margin: [0, 10, 0, 10] },

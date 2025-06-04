@@ -1,34 +1,59 @@
 import { CompanyInterface } from "../interfaces/Company.interface";
+import { PrismaClient } from "../generated/prisma";
 
 export class CompanyRepository {
-    // In-memory storage for simplicity. Replace with actual database logic.
-    private company: CompanyInterface | null = null;
+    private prisma: PrismaClient;
+
+    constructor() {
+        this.prisma = new PrismaClient();
+    }
 
     async create(companyData: CompanyInterface): Promise<CompanyInterface> {
-        // In a real application, this would save to a database
-        if (this.company) {
-            throw new Error("Company information already exists");
+        try {
+            const company = await this.prisma.company.create({
+                data: {
+                    name: companyData.name,
+                    description: companyData.description,
+                    logo: companyData.logo,
+                    website: companyData.website,
+                    email: companyData.email,
+                    phone: companyData.phone,
+                    address: companyData.address
+                }
+            });
+            return company;
+        } catch (error: any) {
+            if (error.code === 'P2002') {
+                throw new Error("A company with this email already exists");
+            }
+            throw error;
         }
-        this.company = { id: 1, ...companyData }; // Assign a simple ID
-        console.log("Company created:", this.company);
-        return this.company;
     }
 
     async get(): Promise<CompanyInterface | null> {
-        // In a real application, this would fetch from a database
-        console.log("Fetching company:", this.company);
-        return this.company;
+        const company = await this.prisma.company.findFirst();
+        return company;
     }
 
     async update(companyData: Partial<CompanyInterface>): Promise<CompanyInterface | null> {
-        // In a real application, this would update in a database
-        if (!this.company) {
+        const existingCompany = await this.prisma.company.findFirst();
+        if (!existingCompany) {
             throw new Error("Company information not found");
         }
-        this.company = { ...this.company, ...companyData };
-        console.log("Company updated:", this.company);
-        return this.company;
+
+        const updatedCompany = await this.prisma.company.update({
+            where: { id: existingCompany.id },
+            data: companyData
+        });
+        return updatedCompany;
     }
 
-    // In a real application, you might also have a delete method
+    async delete(): Promise<void> {
+        const existingCompany = await this.prisma.company.findFirst();
+        if (existingCompany) {
+            await this.prisma.company.delete({
+                where: { id: existingCompany.id }
+            });
+        }
+    }
 } 
